@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pantalla de Inicio - Data Beach Volley</title>
+    <link rel="stylesheet" href="./css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js"></script>
+</head>
+<body>
+    <!-- Menú de navegación -->
+    <nav>
+        <ul>
+            <li><a href="#">Usuario</a></li>
+            <li><a href="#" onclick="logout()">Logout</a></li>
+            <li id="crear-grupo" style="display:none;"><a href="#" onclick="crearGrupo()">Crear Nuevo Grupo</a></li>
+        </ul>
+    </nav>
+
+    <div id="app">
+        <h1>Bienvenido a Data Beach Volley</h1>
+
+        <!-- Calendario -->
+        <div id="calendar"></div>
+
+        <!-- Información de la sesión (Entrenador) -->
+        <div id="session-info" style="display:none;">
+            <h2>Información de la Sesión</h2>
+            <textarea id="session-details" placeholder="Escribe aquí la información de la sesión..."></textarea>
+            <button onclick="saveSession()">Guardar Información</button>
+        </div>
+
+        <!-- Foro del grupo -->
+        <div id="forum">
+            <h2>Foro del Grupo</h2>
+            <div id="forum-content">
+                <!-- Mensajes del foro -->
+                <!-- Los mensajes y archivos se agregarán aquí dinámicamente -->
+            </div>
+            <div id="add-material" style="display:none;">
+                <h3>Añadir Material (Entrenador)</h3>
+                <input type="file" id="file-upload" multiple>
+                <textarea id="material-comments" placeholder="Escribe un comentario..."></textarea>
+                <button onclick="addMaterial()">Añadir Material</button>
+            </div>
+            <div id="forum-comment">
+                <h3>Deja tu Comentario:</h3>
+                <textarea id="forum-comment-text" placeholder="Escribe un comentario..."></textarea>
+                <button onclick="addComment()">Añadir Comentario</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Inicializa el calendario
+        $(document).ready(function() {
+            $('#calendar').fullCalendar({
+                header: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'month,agendaWeek,agendaDay'
+                },
+                editable: true,
+                events: [
+                    // Eventos de ejemplo
+                    {
+                        title: 'Entrenamiento',
+                        start: '2024-09-03T10:00:00',
+                        end: '2024-09-03T12:00:00'
+                    },
+                    {
+                        title: 'Partido',
+                        start: '2024-09-05T17:00:00',
+                        end: '2024-09-05T19:00:00'
+                    }
+                ],
+                dayClick: function(date, jsEvent, view) {
+                    // Abre la ventana de información de la sesión para el entrenador
+                    if (isCoach()) {
+                        $('#session-info').show();
+                    }
+                }
+            });
+
+            // Configuración según el tipo de usuario
+            if (isCoach()) {
+                $('#crear-grupo').show();
+                $('#add-material').show();
+            } else if (isPlayer()) {
+                $('#forum-comment').show();
+            }
+        });
+
+        function isCoach() {
+            // Lógica para determinar si el usuario es un entrenador
+            return true; // Cambiar según la lógica real
+        }
+
+        function isPlayer() {
+            // Lógica para determinar si el usuario es un jugador
+            return false; // Cambiar según la lógica real
+        }
+
+        function logout() {
+            // Lógica para cerrar sesión
+            alert("Sesión cerrada");
+        }
+
+        function crearGrupo() {
+            // Lógica para crear un nuevo grupo
+            alert("Creando nuevo grupo...");
+        }
+
+        function saveSession() {
+            // Lógica para guardar la información de la sesión
+            alert("Información de la sesión guardada.");
+            $('#session-info').hide();
+        }
+
+        function addMaterial() {
+            // Obtener el comentario del material
+            var materialComment = $('#material-comments').val();
+            var files = $('#file-upload')[0].files;
+
+            if (files.length === 0) {
+                alert("Debes seleccionar al menos un archivo.");
+                return;
+            }
+
+            // Agregar material al foro
+            for (var i = 0; i < files.length; i++) {
+                var file = files[i];
+                var fileUrl = URL.createObjectURL(file);
+                var fileName = file.name;
+
+                var fileHtml = '<div class="forum-message"><p><strong>Archivo:</strong> <a href="' + fileUrl + '" download>' + fileName + '</a></p>';
+
+                if (materialComment.trim() !== '') {
+                    fileHtml += '<p><strong>Comentario:</strong> ' + materialComment + '</p>';
+                }
+
+                fileHtml += '</div>';
+
+                $('#forum-content').append(fileHtml);
+            }
+
+            // Limpiar campos
+            $('#file-upload').val('');
+            $('#material-comments').val('');
+        }
+
+        function addComment() {
+            // Obtener el comentario del usuario
+            var commentText = $('#forum-comment-text').val();
+
+            if (commentText.trim() === '') {
+                alert("El comentario no puede estar vacío.");
+                return;
+            }
+
+            // Crear un nuevo elemento de comentario
+            var commentHtml = '<div class="forum-message"><p><strong>Usuario:</strong> ' + commentText + '</p></div>';
+
+            // Agregar el comentario al foro
+            $('#forum-content').append(commentHtml);
+
+            // Limpiar el campo de comentario
+            $('#forum-comment-text').val('');
+        }
+    </script>
+</body>
+</html>
