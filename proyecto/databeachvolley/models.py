@@ -33,5 +33,6 @@ class Usuario(AbstractBaseUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['dni','password','nombre','apellidos','tipo']
     objects = AppUserManager()
+	
     def __str__(self):
-        return self.dni
+        return f'{self.dni}'

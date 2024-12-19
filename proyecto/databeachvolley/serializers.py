@@ -2,14 +2,19 @@ from django.forms import ValidationError
 from rest_framework import serializers
 
 from databeachvolley.models import Usuario
-from django.contrib.auth import get_user_model, authenticate
+from django.contrib.auth import authenticate
 
 UserModel = Usuario
+
+class UsuariosSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserModel
+        fields = ['dni', 'email','password','nombre','apellidos','tipo']
 
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserModel
-        fields = ['dni', 'email','password','nombre','apellidos','tipo']
+        fields = ['email','nombre','apellidos']
 
 class UserRegisterSerializer(serializers.ModelSerializer):
     class Meta:

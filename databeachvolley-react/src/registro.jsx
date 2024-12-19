@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useAuth } from "./AuthContext";
 import { useState } from 'react';
 import './App.css';
 import axios from 'axios';
@@ -12,6 +12,8 @@ const client = axios.create({
 });
 
 function Registro() {
+  const {loginUser} = useAuth();
+
   const [nuevoUsuario, setNuevoUsuario] = useState({
     dni: '',
     email: '',
@@ -21,7 +23,6 @@ function Registro() {
     tipo: ''
   });
 
-  const navigate = useNavigate(); 
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -35,20 +36,31 @@ function Registro() {
     e.preventDefault();
     const { email, password } = nuevoUsuario;
 
-    client
-      .post("/api/register/", nuevoUsuario)
-      .then(() => {
-        return client.post("/api/login/", { email, password });
+    client.post("/api/register/", nuevoUsuario)
+      .then(async () => {
+        await loginUser(email, password);
       })
       .then(() => {
-        alert("Usuario Registrado y Logeado correctamente");
-
-        // Redirigir a la página de inicio
-        navigate("/");
+        Swal.fire({
+          icon: 'success',
+          title: 'Usuario Registrado',
+          text: 'Has sido registrado y logeado correctamente',
+          confirmButtonText: 'Ir al Inicio',
+          confirmButtonColor: '#3085d6'
+        }).then(() => {
+          // Redirigir a la página de inicio
+          window.location.href = "/inicio";
+        });
       })
       .catch((error) => {
-        alert("ERROR");
-        console.error(error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error de Registro',
+        text: error.message || 'Ocurrió un error durante el registro',
+        confirmButtonText: 'Intentar de nuevo',
+        confirmButtonColor: '#d33'
+      });
+      console.error(error);
       });
   };
 

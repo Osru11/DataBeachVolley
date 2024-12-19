@@ -3,13 +3,53 @@ import React, { useState } from 'react';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios'
-
+import { useAuth } from "./AuthContext";
 
 const client = axios.create({
   baseURL: "http://127.0.0.1:8000",
 });
 
 const Login = () => {
+  const {user} = useAuth();
+
+  const {loginUser} = useAuth();
+
+  const submitLogin = async (e) => {
+    
+    event.preventDefault();
+    const email = event.target.email.value;
+    const password = event.target.password.value;
+
+    if (user) {
+      Swal.fire({
+        icon: "error",
+        title: "Ya hay una sesión iniciada.",
+      });
+    }else{
+      try {
+        await loginUser(email, password); 
+  
+        Swal.fire({
+          icon: "success",
+          title: "Has iniciado sesión correctamente",
+          showConfirmButton: false,
+          timer: 1500
+        }).then(() => {
+          window.location.href = "/inicio";
+        });
+  
+  
+      } catch (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Credenciales inválidas",
+          text: "Compruebe su email y contraseñe e intentelo de nuevo."
+        });
+  
+      }
+    }
+  };
+
   const [credentials, setCredentials] = useState({
     email: '',
     password: ''
@@ -25,19 +65,6 @@ const Login = () => {
     });
   };
 
-  const submitLogin = (e) => {
-    e.preventDefault();
-    var email = credentials.email
-    var password = credentials.password
-    client
-      .post("/api/login/", { email, password })
-      .then(() => {
-        alert("Usuario Logeado correctamente");
-        navigate("/");
-      });
-  };
-
-
   const recoverPassword = () => {
     // TODO implementar la lógica para recuperar contraseña
   };
@@ -52,7 +79,7 @@ const Login = () => {
             <input
               type="text"
               name="email"
-              placeholder="Introduzca su Correo electrónico"
+              placeholder="Introduzca su correo electrónico"
               className="form-control"
               required
               onChange={handleChange}

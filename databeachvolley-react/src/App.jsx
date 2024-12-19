@@ -1,95 +1,186 @@
-import { useEffect, useState } from 'react'
-import './App.css'
-import axios from 'axios'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'; // Importa BrowserRouter y Routes
-import Registro from './registro'
-import Login from './login'
-import Inicio from './inicio'
-import Home from './home'
+import React, { useState, useEffect, useRef, useContext } from 'react';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { AuthProvider, useAuth } from "./AuthContext";
+import Registro from "./registro";
+import Login from "./login";
+import Inicio from "./inicio";
+import Home from "./home";
+import Usuario from "./usuario"
+import Grupos from './grupos';
 
+const Navbar = ({ toPage }) => {
+  const { user, logoutUser , loading} = useAuth();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-axios.defaults.xsrfCookieName = 'csrftoken';
-axios.defaults.xsrfHeaderName = 'X-CSRFToken';
-axios.defaults.withCredentials = true;
+  const headerRef = useRef(null);
 
-const client = axios.create({
-  baseURL: "http://127.0.0.1:8000",
-});
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const handleLogout = () => {
+    Swal.fire({
+      title: "¿Seguro que quieres cerrar sesión?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Sí, cerrar sesión!",
+      cancelButtonText: "Cancelar"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        logoutUser();
+      }
+    });
+  }
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!headerRef.current) return;
+
+      if (window.scrollY > 0) {
+        headerRef.current.className = "header-fixed";
+      } else {
+        headerRef.current.className = "header";
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [])
+
+  if (loading){
+    return(
+      <></>
+    );
+  }
+  
+  return (
+    <>
+      <header id="hm-header" className='hm-header' ref={headerRef}>
+        <nav className="text-warning navbar navbar-dark bg-dark">
+          <div className="container-fluid">
+            {user && (
+              <>
+                <button
+                  className="btn btn-outline-light fs-5 me-2 navbar-toggler"
+                  type="button"
+                  onClick={toggleSidebar}
+                >
+                  <i className="bi bi-list"></i>
+                </button>
+              </>
+            )}
+            <a className="navbar-brand" style={{ cursor: "pointer" }} onClick={toPage("inicio")}>
+              Data Beach Volley
+            </a>
+            <div>
+              {user ? (
+                <>
+                  <button className="btn btn-outline-light fs-5 me-2 navbar-toggler" onClick={toPage("grupos")}>
+                    <i className="bi bi-people"></i>
+                  </button>
+                  <button className="btn btn-outline-light fs-5 me-2 navbar-toggler" onClick={toPage("usuario")}>
+                    <i className="bi bi-person-circle"></i>
+                  </button>
+                  <button
+                    className="btn btn-outline-danger fs-5 me-2 navbar-toggler"
+                    onClick={handleLogout}
+                  >
+                    <i className="bi bi-box-arrow-right"></i>
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    className="btn btn-outline-light me-2 navbar-toggler"
+                    onClick={toPage("login")}
+                  >
+                    Iniciar Sesión
+                  </button>
+                  <button
+                    className="btn btn btn-outline-primary me-2 navbar-toggler"
+                    onClick={toPage("registro")}
+                  >
+                    Registrarse
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </nav>
+      </header>
+
+      {/* Menú lateral */}
+      <div className={`z-3 sidebar bg-dark position-fixed h-100 ${ isSidebarOpen ? "d-block" : "d-none"
+        }`}
+      >
+        <ul className="list-group list-group-flush">
+          <li className="bg-dark list-group-item text-secondary">
+            <i className="bi bi-calendar-week"> </i>
+            <a style={{ cursor: "pointer" }} onClick={toPage("")}>Calendario</a>
+          </li>
+          <li className="bg-dark list-group-item text-secondary">
+            <i className="bi bi-chat"> </i>
+            <a style={{ cursor: "pointer" }} onClick={toPage("")}>Foro</a>
+          </li>
+          <li className="bg-dark list-group-item text-secondary">
+            <i className="bi bi-person-workspace"> </i>
+            <a style={{ cursor: "pointer" }} onClick={toPage("")}>Tu grupo</a>
+          </li>
+          <li className="bg-dark list-group-item text-secondary">
+            <i className="bi bi-question-circle"> </i>
+            <a style={{ cursor: "pointer"}} onClick={toPage("")} >Ayuda</a>
+          </li>
+        </ul>
+      </div>
+    </>
+  );
+  
+};
 
 const App = () => {
 
-  const [currentUser, setCurrentUser] = useState();
+  const [page, setPage] = useState(() => window.location.pathname.slice(1));
 
-  useEffect(() => {
-    client
-      .get("/api/user/")
-      .then(() => {
-        setCurrentUser(true);
-      })
-      .catch(() => {
-        setCurrentUser(false);
-      });
-  }, []);
+  const toPage = (newPage) => (event) => {
+    event.preventDefault();
+    window.history.pushState(null, "", `/${newPage}`);
+    setPage(newPage);
+  };
 
-  if (currentUser) {
-    return (
-      <Router> 
-        <div>
-          <header>
-            <nav className="navbar navbar-dark bg-dark">
-              <div className="container-fluid">
-                <a className="navbar-brand" href="/inicio">Data Beach Volley</a>
-                <div>
-                  <button className="btn btn-outline-light me-2" onClick={() => window.location.href = '/grupos'}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" className="bi bi-people" viewBox="0 0 16 16">
-                      <path d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1zm-7.978-1L7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002-.014.002zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4m3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0M6.936 9.28a6 6 0 0 0-1.23-.247A7 7 0 0 0 5 9c-4 0-5 3-5 4q0 1 1 1h4.216A2.24 2.24 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816M4.92 10A5.5 5.5 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275ZM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0m3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4" />
-                    </svg> Grupos
-                  </button>
-                  <button className="btn btn-primary" onClick={() => window.location.href = '/perfil'}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" className="bi bi-person-circle" viewBox="0 0 16 16">
-                      <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0" />
-                      <path fillRule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            </nav>
-          </header>
-          
-          <Routes>
-            <Route path="/inicio" element={<Inicio />} />
-            <Route path="/grupos" element={<Home />} />
-            <Route path="/profile" element={<Home />} />
-            <Route path="/" element={<Home />} />
-          </Routes>
-        </div>
-      </Router>
-    )
-  }
+  const getContent = () => {
+    switch (page) {
+      case "registro":
+        return <Registro />;
+      case "inicio":
+        return <Inicio />;
+      case "login":
+        return <Login />;
+      case "usuario":
+        return <Usuario />;
+      case "grupos":
+        return <Grupos />;
+      default:
+        return <Home />;
+    }
+  };
 
   return (
-    <Router> 
-      <div>
-        <header>
-          <nav className="navbar navbar-dark bg-dark">
-            <div className="container-fluid">
-              <a className="navbar-brand" href="/">Data Beach Volley</a>
-              <div>
-                <button className="btn btn-outline-light me-2" onClick={() => window.location.href = '/login'}>Iniciar Sesión</button>
-                <button className="btn btn-primary" onClick={() => window.location.href = '/registro'}>Registrarse</button>
-              </div>
-            </div>
-          </nav>
-        </header>
+    <AuthProvider>
+        <Router>
+          <Navbar toPage={toPage} />
+          {getContent()}
+        </Router>
+    </AuthProvider>
+  );
 
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/registro" element={<Registro />} />
-          <Route path="/" element={<Home />} /> 
-        </Routes>
-      </div>
-    </Router>
-  )
-}
+  
+};
+
+
 
 export default App;

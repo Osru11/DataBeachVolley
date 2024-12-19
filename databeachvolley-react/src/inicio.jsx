@@ -5,8 +5,17 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
+import { useAuth } from "./AuthContext";
 
 const Inicio = () => {
+
+  const { user } = useAuth();
+
+  if (!user) {
+    window.location.href = "/login"; 
+    return null;
+  }
+
   const handleDateClick = (info) => {
     if (isCoach()) {
       alert(`Has hecho clic en: ${info.dateStr}`);
@@ -31,25 +40,6 @@ const Inicio = () => {
 
   return (
     <div className="container mt-5">
-      {/* Barra de navegación */}
-      <nav className="navbar navbar-expand-lg navbar-light bg-light mb-4">
-        <ul className="navbar-nav me-auto">
-          <li className="nav-item">
-            <a className="nav-link" href="#">Usuario</a>
-          </li>
-          <li className="nav-item">
-            <a className="nav-link" href="#" onClick={logout}>
-              Logout
-            </a>
-          </li>
-          <li className="nav-item">
-            <a className="nav-link" href="#" onClick={crearGrupo}>
-              Crear Nuevo Grupo
-            </a>
-          </li>
-        </ul>
-      </nav>
-
       {/* Título */}
       <h1 className="text-center">Bienvenido a Data Beach Volley</h1>
 
