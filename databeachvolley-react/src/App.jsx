@@ -1,21 +1,30 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import React, { useState, useEffect, useRef } from 'react';
+import { BrowserRouter as Router } from "react-router-dom";
 import { AuthProvider, useAuth } from "./AuthContext";
 import Registro from "./registro";
 import Login from "./login";
 import Inicio from "./inicio";
 import Home from "./home";
 import Usuario from "./usuario"
-import Grupos from './grupos';
+import GroupsManagement from './GroupsManagement';
 
 const Navbar = ({ toPage }) => {
-  const { user, logoutUser , loading} = useAuth();
+  const { user, logoutUser, loading } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const headerRef = useRef(null);
+  const lateralHeaderRef = useRef(null);
 
-  const toggleSidebar = () => {
+  const toggleSidebar = (e) => {
+    //evitar que el click se propague al overlay
+    e && e.stopPropagation();
+
     setIsSidebarOpen(!isSidebarOpen);
+    if (!isSidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
   };
 
   const handleLogout = () => {
@@ -31,6 +40,8 @@ const Navbar = ({ toPage }) => {
       if (result.isConfirmed) {
         logoutUser();
       }
+    }).then(() => {
+      window.location.href = "/home";
     });
   }
 
@@ -40,8 +51,10 @@ const Navbar = ({ toPage }) => {
 
       if (window.scrollY > 0) {
         headerRef.current.className = "header-fixed";
+        lateralHeaderRef.current.id = "lateral-header-fixed";
       } else {
         headerRef.current.className = "header";
+        lateralHeaderRef.current.id = "lateral-header";
       }
     };
 
@@ -49,13 +62,12 @@ const Navbar = ({ toPage }) => {
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
+      document.body.style.overflow = 'auto';
     };
-  }, [])
+  }, []);
 
-  if (loading){
-    return(
-      <></>
-    );
+  if (loading) {
+    return <></>;
   }
   
   return (
@@ -69,15 +81,20 @@ const Navbar = ({ toPage }) => {
                   className="btn btn-outline-light fs-5 me-2 navbar-toggler"
                   type="button"
                   onClick={toggleSidebar}
+                  style={{ 
+                    cursor: 'pointer',
+                    position: 'relative',
+                    zIndex: 4
+                  }}
                 >
-                  <i className="bi bi-list"></i>
+                  <i className={`bi ${isSidebarOpen ? 'bi-x' : 'bi-list'}`}></i>
                 </button>
               </>
             )}
             <a className="navbar-brand" style={{ cursor: "pointer" }} onClick={toPage("inicio")}>
               Data Beach Volley
             </a>
-            <div>
+            <div className="position-relative groups-dropdown-container">
               {user ? (
                 <>
                   <button className="btn btn-outline-light fs-5 me-2 navbar-toggler" onClick={toPage("grupos")}>
@@ -114,36 +131,132 @@ const Navbar = ({ toPage }) => {
         </nav>
       </header>
 
-      {/* Menú lateral */}
-      <div className={`z-3 sidebar bg-dark position-fixed h-100 ${ isSidebarOpen ? "d-block" : "d-none"
+      {/* Overlay */}
+      <div 
+        className={`position-fixed top-0 start-0 w-100 h-100 bg-dark ${
+          isSidebarOpen ? 'd-block bg-opacity-50' : 'd-none'
         }`}
+        style={{ 
+          zIndex: 2,
+          transition: 'opacity 0.3s ease-in-out'
+        }}
+        onClick={toggleSidebar}
+      />
+
+      {/* Menú lateral */}
+      <div 
+        id="lateral-header" 
+        ref={lateralHeaderRef} 
+        className={`sidebar position-fixed h-100 ${
+          isSidebarOpen ? "d-block" : "d-none"
+        }`}
+        style={{ 
+          zIndex: 3,
+          backgroundColor: '#1a1a1a',
+          width: '250px',
+          boxShadow: '2px 0 10px rgba(0,0,0,0.3)',
+          transition: 'transform 0.3s ease-in-out',
+          top: 0,
+          left: 0,
+          paddingTop: '70px'
+        }}
       >
-        <ul className="list-group list-group-flush">
-          <li className="bg-dark list-group-item text-secondary">
-            <i className="bi bi-calendar-week"> </i>
-            <a style={{ cursor: "pointer" }} onClick={toPage("")}>Calendario</a>
+        <ul className="list-group list-group-flush pt-3">
+          <li className="list-group-item border-0" 
+              style={{ 
+                backgroundColor: 'transparent',
+                transition: 'all 0.2s ease-in-out'
+              }}>
+            <a 
+              style={{ 
+                cursor: "pointer",
+                color: '#e0e0e0',
+                textDecoration: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                padding: '10px 15px',
+                transition: 'all 0.2s ease'
+              }}
+              className="sidebar-link"
+              onClick={toPage("")}
+            >
+              <i className="bi bi-bar-chart-line me-3 fs-5"></i>
+              <span>Estadísticas</span>
+            </a>
           </li>
-          <li className="bg-dark list-group-item text-secondary">
-            <i className="bi bi-chat"> </i>
-            <a style={{ cursor: "pointer" }} onClick={toPage("")}>Foro</a>
+          <li className="list-group-item border-0" 
+              style={{ 
+                backgroundColor: 'transparent',
+                transition: 'all 0.2s ease-in-out'
+              }}>
+            <a 
+              style={{ 
+                cursor: "pointer",
+                color: '#e0e0e0',
+                textDecoration: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                padding: '10px 15px',
+                transition: 'all 0.2s ease'
+              }}
+              className="sidebar-link"
+              onClick={toPage("")}
+            >
+              <i className="bi bi-calendar-week me-3 fs-5"></i>
+              <span>Calendario</span>
+            </a>
           </li>
-          <li className="bg-dark list-group-item text-secondary">
-            <i className="bi bi-person-workspace"> </i>
-            <a style={{ cursor: "pointer" }} onClick={toPage("")}>Tu grupo</a>
+          <li className="list-group-item border-0" 
+              style={{ backgroundColor: 'transparent' }}>
+            <a 
+              style={{ 
+                cursor: "pointer",
+                color: '#e0e0e0',
+                textDecoration: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                padding: '10px 15px'
+              }}
+              className="sidebar-link"
+              onClick={toPage("")}
+            >
+              <i className="bi bi-chat me-3 fs-5"></i>
+              <span>Foro</span>
+            </a>
           </li>
-          <li className="bg-dark list-group-item text-secondary">
-            <i className="bi bi-question-circle"> </i>
-            <a style={{ cursor: "pointer"}} onClick={toPage("")} >Ayuda</a>
+          <li className="list-group-item border-0" 
+              style={{ backgroundColor: 'transparent' }}>
+            <div className="sidebar-link">
+              <div className="d-flex align-items-center" style={{ padding: '10px 15px' }}>
+                <i className="bi bi-person-workspace me-3 fs-5" style={{ color: '#e0e0e0' }}></i>
+              </div>
+            </div>
+          </li>
+          <li className="list-group-item border-0" 
+              style={{ backgroundColor: 'transparent' }}>
+            <a 
+              style={{ 
+                cursor: "pointer",
+                color: '#e0e0e0',
+                textDecoration: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                padding: '10px 15px'
+              }}
+              className="sidebar-link"
+              onClick={toPage("")}
+            >
+              <i className="bi bi-question-circle me-3 fs-5"></i>
+              <span>Ayuda</span>
+            </a>
           </li>
         </ul>
       </div>
     </>
   );
-  
 };
 
 const App = () => {
-
   const [page, setPage] = useState(() => window.location.pathname.slice(1));
 
   const toPage = (newPage) => (event) => {
@@ -163,7 +276,7 @@ const App = () => {
       case "usuario":
         return <Usuario />;
       case "grupos":
-        return <Grupos />;
+        return <GroupsManagement />;
       default:
         return <Home />;
     }
@@ -171,16 +284,12 @@ const App = () => {
 
   return (
     <AuthProvider>
-        <Router>
-          <Navbar toPage={toPage} />
-          {getContent()}
-        </Router>
+      <Router>
+        <Navbar toPage={toPage} />
+        {getContent()}
+      </Router>
     </AuthProvider>
   );
-
-  
 };
-
-
 
 export default App;

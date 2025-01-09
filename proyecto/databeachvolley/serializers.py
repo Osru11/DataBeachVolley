@@ -53,3 +53,7 @@ class UserSerializer (serializers. ModelSerializer):
     class Meta:
         model = UserModel
         fields = '__all__'
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)

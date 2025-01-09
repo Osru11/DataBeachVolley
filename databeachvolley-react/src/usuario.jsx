@@ -88,7 +88,6 @@ const Usuario = () => {
   };
 
   const handlePasswordChange = async () => {
-    // Validate password inputs
     if (!passwordData.oldPassword || !passwordData.newPassword || !passwordData.confirmNewPassword) {
       Swal.fire({
         icon: 'error',
@@ -98,7 +97,7 @@ const Usuario = () => {
       });
       return;
     }
-
+  
     if (passwordData.newPassword !== passwordData.confirmNewPassword) {
       Swal.fire({
         icon: 'error',
@@ -108,23 +107,20 @@ const Usuario = () => {
       });
       return;
     }
-
+  
     try {
-      // TODO: Implement actual password change logic with backend
-      // Example of how you might implement this:
       await axiosInstance.put('/api/change-password/', {
         old_password: passwordData.oldPassword,
         new_password: passwordData.newPassword
       });
-
+  
       Swal.fire({
         icon: 'success',
         title: 'Contraseña Actualizada',
         text: 'Tu contraseña ha sido cambiada exitosamente',
         confirmButtonText: 'Aceptar'
       });
-
-      // Reset password fields
+  
       setPasswordData({
         oldPassword: '',
         newPassword: '',
@@ -135,7 +131,7 @@ const Usuario = () => {
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: error.response?.data?.message || 'No se pudo cambiar la contraseña',
+        text: error.response?.data?.error || 'No se pudo cambiar la contraseña',
         confirmButtonText: 'Aceptar'
       });
     }
@@ -160,6 +156,8 @@ const Usuario = () => {
           'success'
         );
       }
+    }).then(() => {
+      window.location.href = "/home";
     });
   };
 

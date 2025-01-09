@@ -12,7 +12,7 @@ const Inicio = () => {
   const { user } = useAuth();
 
   if (!user) {
-    window.location.href = "/login"; 
+    window.location.href = "/home"; 
     return null;
   }
 

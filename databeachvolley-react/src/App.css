@@ -23,3 +23,27 @@ li:hover {
   margin-top: 0px;
   margin-bottom: 0px;
 }
+
+#lateral-header-fixed{
+  position: fixed;
+  height: 100%;
+  z-index: 3;
+  margin-top: 56px;
+}
+.sidebar-link:hover {
+  background-color: rgba(255,255,255,0.1);
+  color: #ffffff !important;
+  transform: translateX(5px);
+}
+
+.sidebar-link {
+  transition: all 0.2s ease-in-out;
+}
+
+.sidebar-link i {
+  transition: transform 0.2s ease-in-out;
+}
+
+.sidebar-link:hover i {
+  transform: scale(1.1);
+}

@@ -4,6 +4,7 @@ import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios'
 import { useAuth } from "./AuthContext";
+import { recoverPassword } from './passwordRecovery';
 
 const client = axios.create({
   baseURL: "http://127.0.0.1:8000",
@@ -65,8 +66,8 @@ const Login = () => {
     });
   };
 
-  const recoverPassword = () => {
-    // TODO implementar la lógica para recuperar contraseña
+  const handleRecoverPassword = () => {
+    recoverPassword();
   };
 
   return (
@@ -99,7 +100,7 @@ const Login = () => {
             <button type="submit" className="btn btn-primary">
               Login
             </button>
-            <button type="button" className="btn btn-secondary" onClick={recoverPassword}>
+            <button type="button" className="btn btn-secondary" onClick={handleRecoverPassword}>
               Recuperar contraseña
             </button>
           </div>
