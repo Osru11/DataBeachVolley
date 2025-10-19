@@ -1,0 +1,37 @@
+# docker-compose.yml
+# ./docker-compose.yml
+version: '3.8'
+
+x-project-name: "databeachvolley"
+
+services:
+  backend:
+    build:
+      context: ./proyecto
+      dockerfile: Dockerfile
+    volumes:
+      - ./proyecto:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=1
+      - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+      - SQL_ENGINE=django.db.backends.mysql
+      - SQL_DATABASE=databeachvolleydb
+      - SQL_USER=root
+      - SQL_PASSWORD=  # Si tienes una contraseña para root en Laragon, colócala aquí
+      - SQL_HOST=host.docker.internal  # Aquí usamos 'host.docker.internal' para acceder al MySQL de Laragon
+      - SQL_PORT=3306
+
+  frontend:
+    build:
+      context: ./databeachvolley-react
+      dockerfile: Dockerfile
+    volumes:
+      - ./databeachvolley-react:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+
+volumes:
+  mysql_data:

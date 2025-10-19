@@ -1,0 +1,24 @@
+# Backend Dockerfile
+# ./proyecto/Dockerfile
+FROM python:3.9
+
+# Establecer directorio de trabajo
+WORKDIR /app
+
+# Instalar dependencias del sistema para MySQL
+RUN apt-get update && apt-get install -y default-libmysqlclient-dev build-essential
+
+# Copiar requirements.txt (necesitarás crearlo)
+COPY requirements.txt .
+
+# Instalar dependencias de Python
+RUN pip install -r requirements.txt
+
+# Copiar el resto del código
+COPY . .
+
+# Exponer puerto
+EXPOSE 8000
+
+# Comando para iniciar la aplicación
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
